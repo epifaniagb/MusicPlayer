@@ -87,6 +87,41 @@ const AudioPlayer = ({ allSongs }) => {
     ));
   };
 
+  const setPlayerDisplay = () => {
+    const playingSongArtist = document.getElementById('playing-song-artist');
+    const playingSongTitle = document.getElementById('playing-song-title');
+
+    if (currentSong) {
+      playingSongArtist.innerText = currentSong.artist;
+      playingSongTitle.innerText = currentSong.title;
+    } else {
+      playingSongArtist.innerText = '';
+      playingSongTitle.innerText = '';
+    }
+  };
+
+  highlightCurrentSong = () => {
+    const playlistSongs = document.querySelectorAll('.playlist-song');
+    playlistSongs.forEach((song) => {
+      if (song.dataset.id === currentSong.id) {
+        song.classList.add('current-song');
+      } else {
+        song.classList.remove('current-song');
+      }
+    });
+  };
+
+  const setPlayButtonAccessibleText = () => {
+    const playPauseButton = document.getElementById('play-pause-button');
+    if (isPlaying) {
+      playPauseButton.innerText = 'Pause';
+      playPauseButton.setAttribute('aria-label', 'Pause');
+    } else {
+      playPauseButton.innerText = 'Play';
+      playPauseButton.setAttribute('aria-label', 'Play');
+    }
+  };
+
   return (
     <div>
       <h1>Audio Player</h1>
