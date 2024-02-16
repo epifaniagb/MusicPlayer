@@ -3,13 +3,10 @@ import ReactDOM from 'react-dom';
 
 const AudioPlayer = ({ allSongs }) => {
   const [currentSong, setCurrentSong] = useState(null);
-  const [songCurrentTime, setSongCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const playSong = (id) => {
-    const song = allSongs.find((song) => song.id === id);
+  const playSong = (song) => {
     setCurrentSong(song);
-    setSongCurrentTime(0);
     setIsPlaying(true);
   };
 
@@ -18,128 +15,63 @@ const AudioPlayer = ({ allSongs }) => {
   };
 
   const playNextSong = () => {
-    if (!currentSong) {
-      playSong(allSongs[0].id);
-    } else {
-      const currentSongIndex = allSongs.findIndex(
-        (song) => song.id === currentSong.id
-      );
-      if (currentSongIndex !== -1 && currentSongIndex < allSongs.length - 1) {
-        playSong(allSongs[currentSongIndex + 1].id);
-      }
+    const currentSongIndex = allSongs.findIndex(
+      (song) => song.id === currentSong.id
+    );
+    if (currentSongIndex !== -1 && currentSongIndex < allSongs.length - 1) {
+      playSong(allSongs[currentSongIndex + 1]);
     }
   };
 
   const playPreviousSong = () => {
-    if (!currentSong) return;
     const currentSongIndex = allSongs.findIndex(
       (song) => song.id === currentSong.id
     );
     if (currentSongIndex > 0) {
-      playSong(allSongs[currentSongIndex - 1].id);
+      playSong(allSongs[currentSongIndex - 1]);
     }
   };
 
   const shuffle = () => {
     const shuffledSongs = [...allSongs].sort(() => Math.random() - 0.5);
     setCurrentSong(null);
-    setSongCurrentTime(0);
-    renderSongs(shuffledSongs);
-    pauseSong();
-    setPlayerDisplay();
-    setPlayButtonAccessibleText();
+    setIsPlaying(false);
   };
 
   const deleteSong = (id) => {
     if (currentSong && currentSong.id === id) {
       setCurrentSong(null);
-      setSongCurrentTime(0);
-      pauseSong();
-      setPlayerDisplay();
+      setIsPlaying(false);
     }
 
     const updatedSongs = allSongs.filter((song) => song.id !== id);
     renderSongs(updatedSongs);
-    highlightCurrentSong();
-    setPlayButtonAccessibleText();
-
-    if (updatedSongs.length === 0) {
-      const resetButton = document.createElement('button');
-      resetButton.id = 'reset';
-      resetButton.setAttribute('aria-label', 'Reset Playlist');
-      resetButton.innerText = 'Reset Playlist';
-
-      resetButton.addEventListener('click', () => {
-        renderSongs(allSongs);
-        setPlayButtonAccessibleText();
-        resetButton.remove();
-      });
-      playlistSongs.appendChild(resetButton);
-    }
   };
 
-  const renderSongs = (array) => {
-    const songsList = document.getElementById('songs-list');
-    songsList.innerHTML = array.map((song) => (
+  const renderSongs = (songs) => {
+    return songs.map((song) => (
       <li key={song.id}>
-        <button onClick={() => playSong(song.id)}>{song.title}</button>
+        <button onClick={() => playSong(song)}>{song.title}</button>
+        <button onClick={() => deleteSong(song.id)}>Delete</button>
       </li>
     ));
-  };
-
-  const setPlayerDisplay = () => {
-    const playingSongArtist = document.getElementById('playing-song-artist');
-    const playingSongTitle = document.getElementById('playing-song-title');
-
-    if (currentSong) {
-      playingSongArtist.innerText = currentSong.artist;
-      playingSongTitle.innerText = currentSong.title;
-    } else {
-      playingSongArtist.innerText = '';
-      playingSongTitle.innerText = '';
-    }
-  };
-
-  highlightCurrentSong = () => {
-    const playlistSongs = document.querySelectorAll('.playlist-song');
-    playlistSongs.forEach((song) => {
-      if (song.dataset.id === currentSong.id) {
-        song.classList.add('current-song');
-      } else {
-        song.classList.remove('current-song');
-      }
-    });
-  };
-
-  const setPlayButtonAccessibleText = () => {
-    const playPauseButton = document.getElementById('play-pause-button');
-    if (isPlaying) {
-      playPauseButton.innerText = 'Pause';
-      playPauseButton.setAttribute('aria-label', 'Pause');
-    } else {
-      playPauseButton.innerText = 'Play';
-      playPauseButton.setAttribute('aria-label', 'Play');
-    }
   };
 
   return (
     <div>
       <h1>Audio Player</h1>
-      <ul>
-        {allSongs.map((song) => (
-          <li key={song.id}>
-            <button onClick={() => playSong(song.id)}>{song.title}</button>
-          </li>
-        ))}
-      </ul>
+      <ul>{renderSongs(allSongs)}</ul>
       {currentSong && (
         <div>
           <h2>Now Playing: {currentSong.title}</h2>
           {isPlaying ? (
             <button onClick={pauseSong}>Pause</button>
           ) : (
-            <button onClick={() => playSong(currentSong.id)}>Play</button>
+            <button onClick={() => playSong(currentSong)}>Play</button>
           )}
+          <button onClick={playPreviousSong}>Previous</button>
+          <button onClick={playNextSong}>Next</button>
+          <button onClick={shuffle}>Shuffle</button>
         </div>
       )}
     </div>
@@ -149,23 +81,24 @@ const AudioPlayer = ({ allSongs }) => {
 const allSongs = [
   {
     id: 0,
-    title: "Carl's First Halloween",
+    title: 'Bottomofurhart',
     artist: 'Earth Dad',
-    duration: '1:57',
-    src: 'https://open.spotify.com/track/4QxUGT7ibzYg2Ody5gHKI2?si=b38d50271e754681',
+    duration: '2:03',
+    src: 'https://open.spotify.com/track/1jpQkEtlcSgishfSEszUpT?si=f9b2352776f24b19',
   },
   {
     id: 1,
-    title: '20',
+    title: 'Atomic Band',
     artist: 'Earth Dad',
-    duration: '4:01',
-    src: 'https://open.spotify.com/track/7pkjMHZdqbTWfvhYWWidWE?si=70431bd5462249fe',
+    duration: '2:48',
+    src: 'https://open.spotify.com/track/3EugMo09CCDogL0iK4impj?si=ac9f7bb48b734a76',
   },
   {
     id: 2,
-    title: 'Drillbit',
+    title: 'Tomorrow',
     artist: 'Earth Dad',
-    src: 'https://open.spotify.com/track/4zkezz9WbHd1lzyvU2MWrv?si=8ffddbb9731444a2',
+    duration: '3:10',
+    src: 'https://open.spotify.com/track/3y2p6WmljH3jwjY3wpByqZ?si=fcd32995e55e415f',
   },
 ];
 
