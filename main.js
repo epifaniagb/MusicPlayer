@@ -18,59 +18,73 @@ const AudioPlayer = ({ allSongs }) => {
   };
 
   const playNextSong = () => {
-    if (!userData?.currentSong) {
-      playSong(userData?.songs[0].id);
+    if (!currentSong) {
+      playSong(allSongs[0].id);
     } else {
-      const currentSongIndex = getCurrentSongIndex;
-      playSong(userData?.songs[currentSongIndex + 1]?.id);
+      const currentSongIndex = allSongs.findIndex(
+        (song) => song.id === currentSong.id
+      );
+      if (currentSongIndex !== -1 && currentSongIndex < allSongs.length - 1) {
+        playSong(allSongs[currentSongIndex + 1].id);
+      }
     }
   };
 
   const playPreviousSong = () => {
-    if (!userData?.currentSong) return;
-    const currentSongIndex = getCurrentSongIndex();
-    playSong(userData?.songs[currentSongIndex - 1]?.id);
+    if (!currentSong) return;
+    const currentSongIndex = allSongs.findIndex(
+      (song) => song.id === currentSong.id
+    );
+    if (currentSongIndex > 0) {
+      playSong(allSongs[currentSongIndex - 1].id);
+    }
   };
 
   const shuffle = () => {
-    userData?.songs.sort(() => Math.random() - 0.5);
-    userData.currentSong = null;
-    userData.songCurrentTime = 0;
-
-    renderSongs(userData?.songs);
+    const shuffledSongs = [...allSongs].sort(() => Math.random() - 0.5);
+    setCurrentSong(null);
+    setSongCurrentTime(0);
+    renderSongs(shuffledSongs);
     pauseSong();
     setPlayerDisplay();
     setPlayButtonAccessibleText();
   };
 
   const deleteSong = (id) => {
-    if (userData?.currentSong?.id === id) {
-      userData.currentSong = null;
-      userData.songCurrentTime = 0;
+    if (currentSong && currentSong.id === id) {
+      setCurrentSong(null);
+      setSongCurrentTime(0);
       pauseSong();
       setPlayerDisplay();
     }
 
-    userData.songs = userData?.songs.filter((song) => song.id !== id);
-    renderSongs(userData?.songs);
-    hightlightCurrentSong();
+    const updatedSongs = allSongs.filter((song) => song.id !== id);
+    renderSongs(updatedSongs);
+    highlightCurrentSong();
     setPlayButtonAccessibleText();
 
-    if (userData?.songs.length === 0) {
+    if (updatedSongs.length === 0) {
       const resetButton = document.createElement('button');
       resetButton.id = 'reset';
-      resetButton.ariaLabel = 'Reset Playlist';
+      resetButton.setAttribute('aria-label', 'Reset Playlist');
       resetButton.innerText = 'Reset Playlist';
 
       resetButton.addEventListener('click', () => {
-        userData.songs = [...allSongs];
-        renderSongs(userData?.songs);
+        renderSongs(allSongs);
         setPlayButtonAccessibleText();
         resetButton.remove();
       });
-
       playlistSongs.appendChild(resetButton);
     }
+  };
+
+  const renderSongs = (array) => {
+    const songsList = document.getElementById('songs-list');
+    songsList.innerHTML = array.map((song) => (
+      <li key={song.id}>
+        <button onClick={() => playSong(song.id)}>{song.title}</button>
+      </li>
+    ));
   };
 
   return (
