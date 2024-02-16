@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-const AudioPlayer = ({ allSongs }) => {
+const AudioPlayer = ({ allSongs, setAllSongs }) => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -34,8 +34,9 @@ const AudioPlayer = ({ allSongs }) => {
 
   const shuffle = () => {
     const shuffledSongs = [...allSongs].sort(() => Math.random() - 0.5);
-    setCurrentSong(null);
-    setIsPlaying(false);
+    setAllSongs(shuffledSongs);
+    setCurrentSong(shuffledSongs[0]);
+    setIsPlaying(true);
   };
 
   const deleteSong = (id) => {
@@ -45,7 +46,7 @@ const AudioPlayer = ({ allSongs }) => {
     }
 
     const updatedSongs = allSongs.filter((song) => song.id !== id);
-    renderSongs(updatedSongs);
+    setAllSongs(updatedSongs);
   };
 
   const renderSongs = (songs) => {
